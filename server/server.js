@@ -6,7 +6,9 @@ const mysquelcredentials = require('./mysqlcreds.js');
 // using the credentials that we loaded, establish a preliminary connection to the database
 const db = mysql.createConnection(mysquelcredentials);
 
-server.use(express.static( __dirname + '/html'))
+server.use(express.static( __dirname + '/html'));
+//have express pull body data that is urlencoded and place it into an object called "body"
+server.use(express.urlencoded({extended: false}));
 
 // when server receives this url at port 3001 specified on line 17, call this function
 // make an endpoint to handle retrieving the grades of all studnets
@@ -39,10 +41,37 @@ server.get('/api/grades', (req, res) => {
             res.send(output);
         });
     });
-})
+});
 
 server.post('/api/grades', (req, res) => {
 
+    // check body object and see if any data was not sent
+    if (req.body.name === undefined || req.body.name === undefined || req.body.grade === undefined) {
+
+        // respond to client with an appropriate error message
+        res.send({
+            success: false,
+            error: 'invalid name, course, or grade'
+        });
+
+        return;
+    }
+
+    // connect to database
+    db.connect( () => {
+        const name = req.body.name.split(' ');
+
+        const query = 'INSERT INTO `grades` SET `surname` = "'+name[1]+'", `givenname` = "'+name[0]+'", `course` = "'+req.body.course+'", `grade` = '+req.body.grade+', `added` = NOW()';
+        console.log(query);
+        db.query(query, (error, result) => {
+            if (!error) {
+                res.send({
+                    success: true,
+                    new_id: result.insertId
+                })
+            }
+        })
+    });
 })
 
 server.listen(3001, () => {
