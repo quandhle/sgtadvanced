@@ -59,8 +59,11 @@ server.post('/api/grades', (req, res) => {
 
     // connect to database
     db.connect( () => {
+
+        // splits up name into array
         const name = req.body.name.split(' ');
 
+        //makes a query string
         const query = 'INSERT INTO `grades` SET `surname` = "'+name[1]+'", `givenname` = "'+name[0]+'", `course` = "'+req.body.course+'", `grade` = '+req.body.grade+', `added` = NOW()';
         console.log(query);
         db.query(query, (error, result) => {
@@ -69,9 +72,47 @@ server.post('/api/grades', (req, res) => {
                     success: true,
                     new_id: result.insertId
                 })
+            } else {
+                res.send({
+                    success: false,
+                    error
+                })
             }
         })
     });
+})
+
+server.delete('/api/grades', (request, response) => {
+    console.log(request.query);
+    
+    // send is like return, returns value and closes connection between client and server
+    // response.send(request.query);
+
+    if (request.query.student_id === undefined) {
+        response.send({
+            success: false,
+            error: 'must provide student ID for delete'
+        });
+
+        return;
+    } 
+    
+    db.connect( () => {
+        const query = "DELETE FROM `grades` WHERE `id` = " + request.query.student_id;
+
+        db.query(query, (error, result) => {
+            if (!error) {
+                response.send({
+                    success: true,
+                })
+            } else {
+                response.send({
+                    success: false,
+                    error: 'id invalid'
+                })
+            }
+        })
+    })
 })
 
 server.listen(3001, () => {

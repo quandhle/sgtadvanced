@@ -153,7 +153,7 @@ class SGT_template{
 					grade: this.domElements.gradeInput.val()
 				},
 			method: 'post',
-			url: 'http://s-apis.learningfuze.com/sgt/create',
+			url: '/api/grades',
 			success: function(response) {
 			}
 		});
@@ -180,12 +180,8 @@ class SGT_template{
 	handleDeleteDataUpdate(id) {
 		$.ajax({
 			dataType: 'json',
-			data: {
-				api_key: 'aLYUe9Ghnr',
-				student_id: id
-			},
-			url: 'http://s-apis.learningfuze.com/sgt/delete',
-			method: 'post',
+			url: '/api/grades?student_id='+id,
+			method: 'delete',
 			success: function(response) {
 				console.log(response);
 			}
